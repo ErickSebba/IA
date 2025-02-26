@@ -66,7 +66,7 @@ def dist(t1, t2):
 def manhattan(estado, obj):
   return np.sum([dist(np.where(obj==i), np.where(estado.matriz==i)) for i in range(1,9)])
 
-#manhattan(estado, obj)
+manhattan(estado, obj)
 
 def hamming(s):
   obj = np.array([[1,2,3], [4,5,6], [7,8,9]])
@@ -124,19 +124,6 @@ def is_solvable(estado):
     # Se o número de inversões for par, o estado é solucionável
     return inversoes % 2 == 0
 
-
-
-o = Estado(matriz=np.array([[1, 2, 3], [4, 5, 6],[7, 8, 9]]))
-s = Estado(matriz=np.array([[1, 2, 3], [4, 5, 6],[7, 8, 9]]))
-
-if is_solvable(s):
-    print("O estado é solucionável. Buscando solução...")
-    v = astar(s, hamming, o)
-    v.mostrar()
-    print(v.d)
-else:
-    print("O estado não tem solução.")
-
 def gerar_estado_aleatorio():
     while True:
         numeros = [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -145,7 +132,20 @@ def gerar_estado_aleatorio():
         if is_solvable(estado):  # Verifica se o estado é solucionável
             return estado
 
-def monte_carlo_melhor_movimento(estado, objetivo, n=100, max_iteracoes=1000):
+o = Estado(matriz=np.array([[1, 2, 3], [4, 5, 6],[7, 8, 9]]))
+s = Estado(matriz=np.array([[1, 3, 2], [5, 9, 4], [7, 8, 6]]))
+
+if is_solvable(s):
+    print("O estado é solucionável. Buscando solução...")
+    v = astar(s, manhattan, o)
+    v.mostrar()
+    print(v.d)
+else:
+    print("O estado não tem solução.")
+
+
+
+'''def monte_carlo_melhor_movimento(estado, objetivo, n=100, max_iteracoes=1000):
     iteracao = 0
 
     while iteracao < max_iteracoes:
@@ -227,6 +227,7 @@ def monte_carlo(estado, objetivo, n=10, max_iteracoes=50):
         iteracao += 1
 
     return False, iteracao  # Solução não encontrada
+
 # Gerar um estado aleatório
 estado = gerar_estado_aleatorio()
 print("Estado inicial:")
@@ -239,3 +240,54 @@ sucesso, iteracoes = monte_carlo(s, o)
 print(f"Solução encontrada: {sucesso}, Iterações: {iteracoes}")
 print("Estado final:")
 s.mostrar()
+
+def mcts_solver(estado_inicial, objetivo, n_clones=100, max_jogadas=20, max_iteracoes=1000):
+    estado_atual = estado_inicial
+    iteracao = 0
+
+    while iteracao < max_iteracoes:
+        if estado_atual == objetivo:
+            return True, iteracao  # Objetivo alcançado
+
+        # Passo 1: Gerar clones para cada ação possível
+        acoes = acoes_permitidas(estado_atual)
+        if acoes.size == 0:
+            return False, iteracao  # Sem ações possíveis
+
+        medias = {}
+        for acao in acoes:
+            heuristicas = []
+            for _ in range(n_clones):
+                # Passo 2: Simular jogadas aleatórias a partir da ação atual
+                clone = movimentar(estado_atual, acao)
+                for _ in range(max_jogadas):
+                    acoes_clone = acoes_permitidas(clone)
+                    if acoes_clone.size == 0:
+                        break
+                    acao_aleatoria = np.random.choice(acoes_clone)
+                    clone = movimentar(clone, acao_aleatoria)
+                # Passo 3: Calcular heurística do clone
+                heuristica = manhattan(clone, objetivo)
+                heuristicas.append(heuristica)
+            # Passo 4: Média das heurísticas para a ação
+            medias[acao] = np.mean(heuristicas)
+
+        # Passo 5: Escolher a ação com a menor média de heurística
+        melhor_acao = min(medias, key=lambda k: medias[k])
+
+        # Passo 6: Atualizar estado atual
+        estado_atual = movimentar(estado_atual, melhor_acao)
+        iteracao += 1
+
+        # Mostrar progresso
+        print(f"Iteração {iteracao}: Melhor ação = {melhor_acao}, Média heurística = {medias[melhor_acao]:.2f}")
+        estado_atual.mostrar()
+
+    return False, iteracao  # Não encontrou solução
+
+# Exemplo de uso
+objetivo = Estado(matriz=np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
+estado_inicial = Estado(matriz=np.array([[1, 2, 3], [4, 9, 5], [7, 8, 6]]))
+
+sucesso, iteracoes = mcts_solver(estado_inicial, objetivo, n_clones=50, max_jogadas=10)
+print(f"Solução encontrada: {sucesso} em {iteracoes} iterações.")'''
