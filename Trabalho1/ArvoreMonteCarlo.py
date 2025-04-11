@@ -111,3 +111,22 @@ estado_inicial = Estado(matriz=np.array([[1, 3, 2], [5, 9, 4], [7, 8, 6]]))
 
 sucesso, iteracoes = mcts_solver(estado_inicial, objetivo, n_clones=50, max_jogadas=10)
 print(f"Solução encontrada: {sucesso} em {iteracoes} iterações.")
+# Parâmetros para geração dos dados
+M = 1000  # Número de pontos de dados gerados
+
+x = np.linspace(0, 2, M)  # Pontos espaçados uniformemente no intervalo [0, 1]
+y = np.sin(2 * np.pi * x) + np.random.normal(0, 0.15, M)
+# Adiciona ruído gaussiano (média 0, desvio padrão 0.15)
+
+# Geração dos dados para a curva teórica
+xr = np.linspace(0, 2, NR)  # Pontos espaçados uniformemente para a curva suave
+yn = np.sin(2 * np.pi * xr)  # Valores da função seno sem ruído
+
+line, = plt.plot(xr, yn, label='sin(2πx)')  # Plota a curva teórica
+plt.scatter(x, y, label='Dados com ruído')  # Plota os pontos de dados com ruído
+plt.legend(handles=[line])  # Adiciona a legenda ao gráfico
+plt.xlabel('x')  # Rótulo do eixo x
+plt.ylabel('y')  # Rótulo do eixo y
+plt.title('Dados Gerados e Função Teórica')  # Título do gráfico
+plt.grid(True)  # Adiciona uma grade ao gráfico
+plt.show()  # Exibe o gráfico
